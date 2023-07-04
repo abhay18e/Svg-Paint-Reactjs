@@ -1,38 +1,50 @@
 import './App.css';
 import { useState ,useEffect, useRef } from "react";
+import DrawHandles from './component/draw-handles';
+import DrawShape from './component/draw-shape';
+import SidePanel from './component/side-panel';
+
 function App(){
   let [shapeList,setShapeList] = useState([])
   let [isDragging,setIsDragging] = useState(false)
+  let [activShapeIndex,setActiveShapeIndex] = useState(null)
+  let [activeHandle,setActiveHandle] = useState("")
+  let svgEl = useRef(null)
 
-  function handleUp(e){
+  function handlePointerUp(e){
     setIsDragging(false)
+    setActiveHandle("")
   }
 
-  function handleMove(e){
-    console.log("hi")
-    let newShape = {...shapeList[0]}
+  function handlePointerMove(e){
+    let newShape = {...shapeList[activShapeIndex]}
+    let rect = svgEl.current.getBoundingClientRect()
+    let pointerX = e.clientX-rect.left
+    let pointerY = e.clientY-rect.top
     if(isDragging){
-      newShape.width = e.clientX-newShape.x
 
-      switch(e.target.id){
-        case "topLeft":
-          newShape.x = e.clientX
-          newShape.y = e.clientY
+      switch(activeHandle){
+        case "bottom-right-handle":
+          newShape.width  = Math.max( pointerX-newShape.x , 10) 
+          newShape.height = Math.max( pointerY-newShape.y , 10)
           break;
-        case "bottomRight":
-          newShape.width = e.clientX-newShape.x
-          newShape.height = e.clientY-newShape.y
+        case "width-handle":
+          newShape.width  = Math.max( pointerX-newShape.x , 10)
           break;
-        case "width":
-          newShape.width = e.clientX-newShape.x
+        case "height-handle":
+          newShape.height = Math.max( pointerY-newShape.y , 10)
           break;
-        case "height":
-          newShape.height = e.clientY-newShape.y
-          break;
+        case "middle-handle":
+          newShape.x = pointerX-newShape.width/2
+          newShape.y = pointerY-newShape.height/2
+        break;
+        case "rotate-handle":
+          let radians = Math.atan2(pointerY-newShape.y,pointerX-newShape.x)
+          newShape.rotation  = radians*180/Math.PI
         default:
           break;
       }
-      updateShapeList(newShape,0)
+      updateShapeList(newShape)
 
     }
    
@@ -40,145 +52,65 @@ function App(){
 
   function addShape(shapeType){
 
-    switch(shapeType){
-      case "rectangle":
-        setShapeList([...shapeList,{
-          type:shapeType,
-          x:0,
-          y:0,
-          width:100,
-          height:100,
-          fill:"red",
-          isActive:true,
-        }])
-        break;
-      default:
-        break;
-    }
+    setShapeList([...shapeList,{
+      type:shapeType,
+      x:0,
+      y:0,
+      width:100,
+      height:100,
+      fill:"red",
+      rotation:45
+    }])
+    setActiveShapeIndex(shapeList.length)
 
   }
 
-  function updateShapeList(shape,index){
-    console.log(shape,index)
+  function updateShapeList(shape){
     let newShapeList = [...shapeList]
-    newShapeList[index] = shape
+    newShapeList[activShapeIndex] = shape
     setShapeList(newShapeList)
+  }
+
+  function handleCLick(e){
+    console.log(e.target)
+    
+    if(e.target.id === "outer-container" || e.target.id === "svg-container"){
+      setActiveShapeIndex(null)
+    }
   }
 
 
 
   return (
-     <div id="outer-container">
+     <div id="outer-container" onClick={handleCLick}>
       <h1 id="heading">Svg Paint</h1>
       <SidePanel addShape={addShape} />
-      <svg id="svg-container" onPointerMove={handleMove} onPointerUp={handleUp}>
-       {shapeList.map((shape,index)=>{
-        return[
-          <DrawShape shape={shape} />,
-          <DrawHandles 
+      <svg height={500} ref={svgEl} id="svg-container" onPointerMove={handlePointerMove} onPointerUp={handlePointerUp}>
+       {
+       shapeList.map((shape,index)=>
+          <DrawShape 
           shape={shape} 
-          topLeftHandle={false} 
-          bottomRightHandle={false} 
-          widthHandle={true} 
-          height={false}
-          setIsDragging={setIsDragging} 
-          />,
-        ]
-       })}
+          index={index} 
+          setActiveShapeIndex={setActiveShapeIndex}
+          />)
+       }
+
+       {
+       activShapeIndex !== null &&
+        <DrawHandles 
+        shape={shapeList[activShapeIndex]} 
+        setIsDragging={setIsDragging}
+        setActiveHandle={setActiveHandle}
+        />
+       }
       </svg>
      </div>
   )
 }
 
-function DrawShape({shape}){
-
-  switch(shape.type){
-    case "rectangle":
-      return <rect 
-      x={shape.x}
-      y={shape.y}
-      width={shape.width}
-      height={shape.height}
-      fill={shape.fill} 
-      />
-    
-    break;
-    default:
-      return null
-      break;  
-  }
-}
 
 
-function DrawHandles({shape,topLeftHandle,bottomRightHandle,widthHandle,heightHandle,setIsDragging}){
-
-  const radius = 5
-  let handles = {
-    topLeft:{
-      x:shape.x,
-      y:shape.y,
-    },
-    bottomRight:{
-      x:shape.x+shape.width,
-      y:shape.y+shape.height,
-    },
-    height: {
-      x:shape.x+shape.width/2,
-      y:shape.y+shape.height,
-    },
-    width:{
-      x:shape.x+shape.width,
-      y:shape.y+shape.height/2,
-    }
-  }
-
-  function handleDown(e){
-    setIsDragging(true)
-  }
-
-  
-
-  return(
-    <>
-   { topLeftHandle && <circle 
-    cx={handles.topLeft.x}
-    cy={handles.topLeft.y}
-    r={radius} />
-   }
-    {bottomRightHandle && <circle 
-    cx={handles.bottomRight.x}
-    cy={handles.bottomRight.y}
-    r={radius} />
-   }
-   { widthHandle && <circle 
-    cx={handles.width.x}
-    cy={handles.width.y} 
-    onPointerDown={handleDown}
-    r={radius} />
-   }
-   { heightHandle && <circle 
-    cx={handles.height.x} 
-    cy={handles.height.y} 
-    r={radius} /> 
-   }
-    </>
-  )
-}
 
 
-function SidePanel({addShape}){
- 
-
-
-  return (
-    <div id="side-panel">
-     <button 
-     onClick={()=>addShape("rectangle")}
-     >
-      Rectangle
-      </button>
-    </div>
-  )
-}
 
 export default App;
