@@ -54,12 +54,12 @@ function App(){
 
     setShapeList([...shapeList,{
       type:shapeType,
-      x:0,
-      y:0,
+      x:100,
+      y:100,
       width:100,
       height:100,
       fill:"red",
-      rotation:45
+      rotation:0
     }])
     setActiveShapeIndex(shapeList.length)
 
