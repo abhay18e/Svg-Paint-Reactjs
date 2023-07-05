@@ -3,7 +3,7 @@ import { useState ,useEffect, useRef } from "react";
 import DrawHandles from './component/draw-handles';
 import DrawShape from './component/draw-shape';
 import SidePanel from './component/side-panel';
-
+import rotatedVector from './util/rotate-vector';
 function App(){
   let [shapeList,setShapeList] = useState([])
   let [isDragging,setIsDragging] = useState(false)
@@ -19,8 +19,16 @@ function App(){
   function handlePointerMove(e){
     let newShape = {...shapeList[activShapeIndex]}
     let rect = svgEl.current.getBoundingClientRect()
-    let pointerX = e.clientX-rect.left
-    let pointerY = e.clientY-rect.top
+    let pointer ={
+      x:e.clientX-rect.left,
+      y:e.clientY-rect.top
+    }
+
+    let cx = newShape.x + newShape.width/2;
+    let cy = newShape.y + newShape.height/2;
+    
+    let {x:pointerX,y:pointerY} = rotatedVector(cx,cy,pointer,-1*newShape.rotation)
+
     if(isDragging){
 
       switch(activeHandle){
@@ -85,7 +93,15 @@ function App(){
      <div id="outer-container" onClick={handleCLick}>
       <h1 id="heading">Svg Paint</h1>
       <SidePanel addShape={addShape} />
-      <svg height={500} ref={svgEl} id="svg-container" onPointerMove={handlePointerMove} onPointerUp={handlePointerUp}>
+      <svg 
+      height={500} 
+      ref={svgEl} 
+      id="svg-container" 
+      onMouseMove={handlePointerMove} 
+      onTouchMove={handlePointerMove}
+      onMouseUp={handlePointerUp}
+      onTouchEnd={handlePointerUp}
+      >
        {
        shapeList.map((shape,index)=>
           <DrawShape 

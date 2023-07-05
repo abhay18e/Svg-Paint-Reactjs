@@ -1,3 +1,4 @@
+import rotateVector from "../util/rotate-vector"
 
 function DrawHandles({shape,setIsDragging,setActiveHandle}){
     let bottomRightHandle = true
@@ -13,9 +14,9 @@ function DrawHandles({shape,setIsDragging,setActiveHandle}){
     let cx = shape.x + shape.width/2;
     let cy = shape.y + shape.height/2;
     let style =  {
-        transform: `rotate(${shape.rotation}deg)`,
-        //tranfrom origin should be cx cy
-        transforOrigin: `${cx}px ${cy}px`
+        // transformBox: "fill-box",
+        // transform: `rotate(${shape.rotation}deg)`,
+        // transforOrigin: "center",//`${cx}px ${cy}px`,
     }
     
   
@@ -54,39 +55,43 @@ function DrawHandles({shape,setIsDragging,setActiveHandle}){
       <>
       {
         rotateHandle && <circle 
-        cx={handles.rotate.x}
-        cy={handles.rotate.y}
+        cx={rotateVector(cx,cy,handles.rotate,shape.rotation).x}
+        cy={rotateVector(cx,cy,handles.rotate,shape.rotation).y}
         r={radius}
         style={style}
         id='rotate-handle'
-        onPointerDown={handleDown}
+        onMouseDown={handleDown}
+        onTouchStart={handleDown}
         />
       }
       {
         middleHandle && <circle
-        cx={handles.middle.x}
-        cy={handles.middle.y}
+        cx={rotateVector(cx,cy,handles.middle,shape.rotation).x}
+        cy={rotateVector(cx,cy,handles.middle,shape.rotation).y}
         r={radius}
         style={style}
         id='middle-handle'
-        onPointerDown={handleDown}
+        onMouseDown={handleDown}
+        onTouchStart={handleDown}
          />
       } 
       {
       bottomRightHandle && <circle 
-      cx={handles.bottomRight.x}
-      cy={handles.bottomRight.y}
+      cx={rotateVector(cx,cy,handles.bottomRight,shape.rotation).x}
+      cy={rotateVector(cx,cy,handles.bottomRight,shape.rotation).y}
       r={radius}
       style={style}
       id='bottom-right-handle'
-      onPointerDown={handleDown}
+      onMouseDown={handleDown}
+      onTouchStart={handleDown}
       />
      }
      { 
       widthHandle && <circle 
-      cx={handles.width.x}
-      cy={handles.width.y} 
-      onPointerDown={handleDown}
+      cx={rotateVector(cx,cy,handles.width,shape.rotation).x}
+      cy={rotateVector(cx,cy,handles.width,shape.rotation).y} 
+      onMouseDown={handleDown}
+      onTouchStart={handleDown}
       r={radius}
       style={style}
       id='width-handle'
@@ -94,17 +99,18 @@ function DrawHandles({shape,setIsDragging,setActiveHandle}){
      }
      { 
       heightHandle && <circle 
-      cx={handles.height.x} 
-      cy={handles.height.y} 
+      cx={rotateVector(cx,cy,handles.height,shape.rotation).x} 
+      cy={rotateVector(cx,cy,handles.height,shape.rotation).y} 
       r={radius}
       style={style}
-      onPointerDown={handleDown}
+      onMouseDown={handleDown}
+      onTouchStart={handleDown}
       id="height-handle"
       /> 
      }
       </>
     )
   }
-
+  
   
 export default DrawHandles;
