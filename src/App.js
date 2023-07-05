@@ -4,6 +4,7 @@ import DrawHandles from './component/draw-handles';
 import DrawShape from './component/draw-shape';
 import SidePanel from './component/side-panel';
 import rotatedVector from './util/rotate-vector';
+
 function App(){
   let [shapeList,setShapeList] = useState([])
   let [isDragging,setIsDragging] = useState(false)
@@ -19,11 +20,21 @@ function App(){
   function handlePointerMove(e){
     let newShape = {...shapeList[activShapeIndex]}
     let rect = svgEl.current.getBoundingClientRect()
-    let pointer ={
-      x:e.clientX-rect.left,
-      y:e.clientY-rect.top
+    let pointer;
+    if (e.touches) {
+      // If it's a touch event
+      pointer = {
+        x: e.touches[0].clientX - rect.left,
+        y: e.touches[0].clientY - rect.top,
+      };
+    } else {
+      // If it's a mouse event
+      pointer = {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      };
     }
-
+  
     let cx = newShape.x + newShape.width/2;
     let cy = newShape.y + newShape.height/2;
     
