@@ -17,8 +17,10 @@ function DrawShape({shape,index,setActiveShapeIndex}){
         y={shape.y}
         width={shape.width}
         height={shape.height}
-        fill={shape.fill}
-        style={style} 
+        fill={shape.fillColor}
+        style={style}
+        stroke={shape.strokeColor}
+        strokeWidth={shape.strokeWidth} 
         onClick={()=>setActiveShapeIndex(index)}
         />
       break;
@@ -27,8 +29,10 @@ function DrawShape({shape,index,setActiveShapeIndex}){
         cx={cx} 
         cy={cy} 
         r={rx} 
-        fill={shape.fill}
-        style={style} 
+        fill={shape.fillColor}
+        style={style}
+        stroke={shape.strokeColor}
+        strokeWidth={shape.strokeWidth} 
         onClick={()=>setActiveShapeIndex(index)}
         />
         break;
@@ -38,8 +42,10 @@ function DrawShape({shape,index,setActiveShapeIndex}){
         cy={cy}
         rx={rx}
         ry={ry}
-        fill={shape.fill}
+        fill={shape.fillColor}
         style={style}
+        stroke={shape.strokeColor}
+        strokeWidth={shape.strokeWidth}
         onClick={()=>setActiveShapeIndex(index)}
         />
         break;

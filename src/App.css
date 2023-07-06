@@ -22,7 +22,6 @@
 #side-panel {
   flex: 0 0 100px; /* Set a fixed width of 100px */
   align-self: stretch;
-  background-color: #c5e5fa;
 }
 
 #svg-container {
