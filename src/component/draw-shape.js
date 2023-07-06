@@ -1,3 +1,5 @@
+import customShape from "../util/custom-shape";
+
 function DrawShape({shape,index,setActiveShapeIndex}){
 
     let cx = shape.x + shape.width/2;
@@ -49,6 +51,17 @@ function DrawShape({shape,index,setActiveShapeIndex}){
         onClick={()=>setActiveShapeIndex(index)}
         />
         break;
+      case "arrow":
+        let points = customShape.arrow.getPoints(shape)
+        return  <polygon
+            points={points}
+            fill={shape.fillColor}
+            style={style}
+            stroke={shape.strokeColor}
+            strokeWidth={shape.strokeWidth}
+            onClick={() => setActiveShapeIndex(index)}
+          />
+          break;
       default:
         return null
         break;  
@@ -56,3 +69,5 @@ function DrawShape({shape,index,setActiveShapeIndex}){
   }
 
   export default DrawShape;
+
+

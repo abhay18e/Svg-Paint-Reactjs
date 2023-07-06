@@ -24,20 +24,17 @@ function SidePanel({addShape,shape,updateShapeList,backgroundColor,setBackground
     return (
       <div id="side-panel">
         <div id="shapes">
-        <button 
-        onClick={()=>addShape("rectangle")}
-        >
+        <button onClick={()=>addShape("rectangle")}>
           Rectangle
         </button>
-        <button
-        onClick={()=>addShape("circle")}
-        >
+        <button onClick={()=>addShape("circle")}>
           Circle
         </button>
-        <button 
-        onClick={()=>addShape("ellipse")}
-        >
+        <button onClick={()=>addShape("ellipse")}>
           Ellipse
+        </button>
+        <button onClick={()=>addShape("arrow")}>
+         Arrow
         </button>
         </div>
 

@@ -4,6 +4,7 @@ import DrawHandles from './component/draw-handles';
 import DrawShape from './component/draw-shape';
 import SidePanel from './component/side-panel';
 import rotatedVector from './util/rotate-vector';
+import customShape from './util/custom-shape';
 
 function App(){
   let [shapeList,setShapeList] = useState([])
@@ -125,6 +126,7 @@ function App(){
       onMouseUp={handlePointerUp}
       onTouchEnd={handlePointerUp}
       >
+        
        {
        shapeList.map((shape,index)=>
           <DrawShape 
