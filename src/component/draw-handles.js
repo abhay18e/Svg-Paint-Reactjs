@@ -1,6 +1,6 @@
 import rotateVector from "../util/rotate-vector"
 
-function DrawHandles({shape,setIsDragging,setActiveHandle}){
+function DrawHandles({shape,setIsDragging,setActiveHandle,setActiveLineHandleIndex}){
     let bottomRightHandle = true
     let widthHandle = true
     let heightHandle = true
@@ -44,11 +44,30 @@ function DrawHandles({shape,setIsDragging,setActiveHandle}){
       }
     }
   
-    function handleDown(e){
+    function handleDown(e,lineHandleIndex){
       setIsDragging(true)
-      setActiveHandle(e.target.id)
+      setActiveHandle(e.target.classList[0])
+      setActiveLineHandleIndex(lineHandleIndex)
     }
-  
+
+    
+    
+    if(shape.type === "line" || shape.type === "polygon"){
+      return <>
+      {
+        shape.points.map((point,i)=>{
+          return <circle
+          cx={point.x}
+          cy={point.y}
+          r={radius}
+          class={`line-handle`}
+          onMouseDown={(e)=>handleDown(e,i)}
+          onTouchStart={(e)=>handleDown(e,i)}
+          />
+        })
+      }
+      </>
+    }
     
   
     return(
@@ -59,7 +78,7 @@ function DrawHandles({shape,setIsDragging,setActiveHandle}){
         cy={rotateVector(cx,cy,handles.rotate,shape.rotation).y}
         r={radius}
         style={style}
-        id='rotate-handle'
+        class='rotate-handle'
         onMouseDown={handleDown}
         onTouchStart={handleDown}
         />
@@ -70,7 +89,7 @@ function DrawHandles({shape,setIsDragging,setActiveHandle}){
         cy={rotateVector(cx,cy,handles.middle,shape.rotation).y}
         r={radius}
         style={style}
-        id='middle-handle'
+        class='middle-handle'
         onMouseDown={handleDown}
         onTouchStart={handleDown}
          />
@@ -81,7 +100,7 @@ function DrawHandles({shape,setIsDragging,setActiveHandle}){
       cy={rotateVector(cx,cy,handles.bottomRight,shape.rotation).y}
       r={radius}
       style={style}
-      id='bottom-right-handle'
+      class='bottom-right-handle'
       onMouseDown={handleDown}
       onTouchStart={handleDown}
       />
@@ -94,7 +113,7 @@ function DrawHandles({shape,setIsDragging,setActiveHandle}){
       onTouchStart={handleDown}
       r={radius}
       style={style}
-      id='width-handle'
+      class='width-handle'
       />
      }
      { 
@@ -105,7 +124,7 @@ function DrawHandles({shape,setIsDragging,setActiveHandle}){
       style={style}
       onMouseDown={handleDown}
       onTouchStart={handleDown}
-      id="height-handle"
+      class="height-handle"
       /> 
      }
       </>

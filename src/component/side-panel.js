@@ -1,4 +1,11 @@
+import { useState } from 'react'
 function SidePanel({addShape,shape,updateShapeList,backgroundColor,setBackgroundColor}){
+  const [vertexCount,setVertexCount] = useState(3)
+  
+  const handleVertexCount = (e)=>{
+      const value =Number(e.target.value)
+      value >= 3 ? setVertexCount(value) : setVertexCount(3)
+  }
   
    const handleColor = (fillColor)=>{
     let newShape = {...shape}
@@ -36,6 +43,13 @@ function SidePanel({addShape,shape,updateShapeList,backgroundColor,setBackground
         <button onClick={()=>addShape("arrow")}>
          Arrow
         </button>
+        <button onClick={()=>addShape("line")}>
+          line
+          </button>
+          <input type='number' value={vertexCount} onChange={handleVertexCount} />
+          <button onClick={()=>addShape("polygon",vertexCount)}>
+            Polygon
+            </button>
         </div>
 
         <div>

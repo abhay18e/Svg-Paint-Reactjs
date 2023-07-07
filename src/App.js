@@ -4,19 +4,21 @@ import DrawHandles from './component/draw-handles';
 import DrawShape from './component/draw-shape';
 import SidePanel from './component/side-panel';
 import rotatedVector from './util/rotate-vector';
-import customShape from './util/custom-shape';
+import shapeInfo from './util/shape-info';
 
 function App(){
   let [shapeList,setShapeList] = useState([])
   let [isDragging,setIsDragging] = useState(false)
   let [activShapeIndex,setActiveShapeIndex] = useState(null)
   let [activeHandle,setActiveHandle] = useState("")
+  let [activeLineHandleIndex,setActiveLineHandleIndex] = useState(0)
   let [backgroundColor,setBackgroundColor] = useState("#00ffff")
   let svgEl = useRef(null)
 
   function handlePointerUp(e){
     setIsDragging(false)
     setActiveHandle("")
+    setActiveLineHandleIndex(0)
   }
 
   function handlePointerMove(e){
@@ -45,7 +47,7 @@ function App(){
     let {x:pointerX,y:pointerY} = rotatedVector(cx,cy,pointer,-1*newShape.rotation)
 
     if(isDragging){
-
+       console.log(activeHandle)
       switch(activeHandle){
         case "bottom-right-handle":
           newShape.width  = Math.max( pointerX-newShape.x , MIN_WIDTH_HEIGHT) 
@@ -64,6 +66,13 @@ function App(){
         case "rotate-handle":
           let radians = Math.atan2(pointerY-newShape.y,pointerX-newShape.x)
           newShape.rotation  = radians*180/Math.PI
+          break;
+        case "line-handle":
+          console.log(activeLineHandleIndex)
+          let newPoints = [...newShape.points]
+          newPoints[Number(activeLineHandleIndex)] = {x:pointer.x,y:pointer.y}
+          newShape.points = newPoints
+          break;
         default:
           break;
       }
@@ -73,21 +82,17 @@ function App(){
    
   }
 
-  function addShape(shapeType){
-
-    setShapeList([...shapeList,{
-      type:shapeType,
-      x:100,
-      y:100,
-      width:100,
-      height:100,
-      fillColor:"#ff0000",
-      strokeColor:"#808080",
-      strokeWidth:2,
-      rotation:0
-    }])
+  function addShape(shapeType,vertexCount=0){
+    
+    if(shapeType === "line"){
+      setShapeList([...shapeList,shapeInfo.defaultLineDimension(shapeType)])
+    }else if(shapeType === "polygon"){
+      setShapeList([...shapeList,shapeInfo.defaultPolygonDimension(shapeType,vertexCount)])
+    }else {
+      setShapeList([...shapeList,shapeInfo.defaultSquareDimension(shapeType)])
+    }
     setActiveShapeIndex(shapeList.length)
-
+    return
   }
 
   function updateShapeList(shape){
@@ -96,9 +101,7 @@ function App(){
     setShapeList(newShapeList)
   }
 
-  function handleCLick(e){
-    console.log(e.target)
-    
+  function handleCLick(e){    
     if(e.target.id === "outer-container" || e.target.id === "svg-container"){
       setActiveShapeIndex(null)
     }
@@ -126,6 +129,7 @@ function App(){
       onMouseUp={handlePointerUp}
       onTouchEnd={handlePointerUp}
       >
+       
         
        {
        shapeList.map((shape,index)=>
@@ -142,6 +146,7 @@ function App(){
         shape={shapeList[activShapeIndex]} 
         setIsDragging={setIsDragging}
         setActiveHandle={setActiveHandle}
+        setActiveLineHandleIndex={setActiveLineHandleIndex}
         />
        }
       </svg>
