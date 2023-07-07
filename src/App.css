@@ -28,6 +28,7 @@
   flex: 1 1 auto;
   align-self: stretch;
   background-color: #fbe6ac;
+  touch-action: none;
 }
 
 
