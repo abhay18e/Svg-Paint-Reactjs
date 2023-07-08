@@ -14,6 +14,7 @@ function App(){
   let [activeLineHandleIndex,setActiveLineHandleIndex] = useState(0)
   let [backgroundColor,setBackgroundColor] = useState("#00ffff")
   let svgEl = useRef(null)
+  let [isShowSidePanel,setIsShowSidePanel] = useState(true)
 
   function handlePointerUp(e){
     setIsDragging(false)
@@ -25,20 +26,10 @@ function App(){
     const MIN_WIDTH_HEIGHT = 10
     let newShape = {...shapeList[activShapeIndex]}
     let rect = svgEl.current.getBoundingClientRect()
-    let pointer;
-    if (e.touches) {
-      // If it's a touch event
-      e.preventDefault()
-      pointer = {
-        x: e.touches[0].clientX - rect.left,
-        y: e.touches[0].clientY - rect.top,
-      };
-    } else {
-      // If it's a mouse event
-      pointer = {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
-      };
+  
+    let pointer = {
+      x: e.touches ? e.touches[0].clientX - rect.left : e.clientX - rect.left,
+      y: e.touches ? e.touches[0].clientY - rect.top : e.clientY - rect.top,
     }
   
     let cx = newShape.x + newShape.width/2;
@@ -111,45 +102,62 @@ function App(){
 
   return (
      <div id="outer-container" onClick={handleCLick}>
-      <h1 id="heading">Svg Paint</h1>
-      <SidePanel 
-      addShape={addShape} 
-      shape={shapeList[activShapeIndex]}
-      updateShapeList={updateShapeList} 
-      setBackgroundColor={setBackgroundColor}
-      backgroundColor={backgroundColor}
-      />
-      <svg 
-      height={500} 
-      ref={svgEl} 
-      id="svg-container"
-      style={{backgroundColor:backgroundColor}} 
-      onMouseMove={handlePointerMove} 
-      onTouchMove={handlePointerMove}
-      onMouseUp={handlePointerUp}
-      onTouchEnd={handlePointerUp}
-      >
-       
         
-       {
-       shapeList.map((shape,index)=>
-          <DrawShape 
-          shape={shape} 
-          index={index} 
-          setActiveShapeIndex={setActiveShapeIndex}
-          />)
-       }
+        <h1 id="heading">Svg Paint</h1>
+      
+        <div id="paint-container">
+          <svg 
+          height={500} 
+          ref={svgEl} 
+          id="svg-container"
+          style={{backgroundColor:backgroundColor}} 
+          onMouseMove={handlePointerMove} 
+          onTouchMove={handlePointerMove}
+          onMouseUp={handlePointerUp}
+          onTouchEnd={handlePointerUp}
+          >
+            {
+            shapeList.map((shape,index)=>
+                <DrawShape 
+                shape={shape} 
+                index={index} 
+                setActiveShapeIndex={setActiveShapeIndex}
+                />)
+            }
 
-       {
-       activShapeIndex !== null &&
-        <DrawHandles 
-        shape={shapeList[activShapeIndex]} 
-        setIsDragging={setIsDragging}
-        setActiveHandle={setActiveHandle}
-        setActiveLineHandleIndex={setActiveLineHandleIndex}
-        />
-       }
-      </svg>
+            {
+            activShapeIndex !== null &&
+              <DrawHandles 
+              shape={shapeList[activShapeIndex]} 
+              setIsDragging={setIsDragging}
+              setActiveHandle={setActiveHandle}
+              setActiveLineHandleIndex={setActiveLineHandleIndex}
+              />
+            }
+          </svg>
+          
+          <div id="side-panel-container">
+           
+           {
+            isShowSidePanel &&
+           <SidePanel 
+            addShape={addShape} 
+            shape={shapeList[activShapeIndex]}
+            updateShapeList={updateShapeList} 
+            setBackgroundColor={setBackgroundColor}
+            backgroundColor={backgroundColor}
+            />}
+            
+            <button 
+            id="side-panel-button"
+            onClick={()=>setIsShowSidePanel(bool=>!bool)}>
+              {isShowSidePanel ? "Hide Side Panel" : "ShowSidePanel"}
+            </button>
+            
+          </div>
+      
+        </div>
+      
      </div>
   )
 }
