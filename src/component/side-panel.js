@@ -3,24 +3,64 @@ function SidePanel({addShape,shape,updateShapeList,backgroundColor,setBackground
   const [vertexCount,setVertexCount] = useState(3)
 
   const flexContainerStyle = {
+    padding:"4px 0px",
     display: "flex",
     flexDirection: "row",
     flexWrap: "wrap",
     boxShadow: "1px 1px 5px grey",
-  }
+  };
 
   const flexItemStyle = {
-    flex:"95%",
-    margin:"1px",
-  }
+    flex: "95%",
+    margin: "1px",
+  };
 
-  const inputStyle ={
+  const inputStyle = {
+    width: "50px",
+    padding: "4px",
+    borderRadius: "4px",
+    border: "1px solid #ccc",
+    outline: "none",
+  };
+
+  const colorInputStyle = {
+    ...inputStyle,
     
-    width:"50px",
-  }
+    appearance: "none",
+    "-moz-appearance": "none",
+    "-webkit-appearance": "none",
+    background: "none",
+    border: 0,
+  cursor: "pointer",
+  height: "25px",
+  padding: 0,
+  width: "50px",
+  };
+  
+
   const buttonStyle = {
-    padding:"1px",
-  }
+    padding: "4px 8px",
+    borderRadius: "4px",
+    width:"90px",
+    border: "none",
+    margin:"1px",
+    backgroundColor: "grey",
+    color: "#fff",
+    cursor: "pointer",
+    outline: "none",
+    margin:"0px 4px",
+  };
+
+  const labelStyle = {
+    display: "inline-flex",
+    //alignItems: "center",
+    padding:"0px 4px",
+    width: "90px",
+    color: "black",
+    margin: "1px",
+    // backgroundColor: "grey",
+    // color: "#fff",
+  };
   
   const handleVertexCount = (e)=>{
       const value =Number(e.target.value)
@@ -77,17 +117,17 @@ function SidePanel({addShape,shape,updateShapeList,backgroundColor,setBackground
             </button>
           </div>
           <div style={flexItemStyle} className='flex-item'>
-            <input style={inputStyle} type='number' value={vertexCount} onChange={handleVertexCount} />
             <button style={buttonStyle} onClick={()=>addShape("polygon",vertexCount)} disabled={vertexCount<3}>
               Polygon
             </button>
+            <input style={inputStyle} type='number' value={vertexCount} onChange={handleVertexCount} />
           </div>
           
         
 
         <div style={flexItemStyle} className='flex-item'>
-        <label htmlFor="background-color">Color:</label>
-        <input style={inputStyle}
+        <label style={labelStyle} htmlFor="background-color">Background Color</label>
+        <input style={colorInputStyle}
           type="color"
           id="backgroundColor"
           value={backgroundColor}
@@ -99,8 +139,8 @@ function SidePanel({addShape,shape,updateShapeList,backgroundColor,setBackground
    shape &&    
   <>
       <div style={flexItemStyle} className='flex-item'>
-        <label htmlFor="fill-color">Color:</label>
-        <input style={inputStyle}
+        <label style={labelStyle} htmlFor="fill-color">Fill Color</label>
+        <input style={colorInputStyle}
           type="color"
           id="fillColor"
           value={shape.fillColor}
@@ -108,8 +148,8 @@ function SidePanel({addShape,shape,updateShapeList,backgroundColor,setBackground
         />
       </div>
       <div style={flexItemStyle} className='flex-item'>
-        <label htmlFor="strokeColor">Stroke Color:</label>
-        <input style={inputStyle}
+        <label style={labelStyle} htmlFor="strokeColor">Stroke Color</label>
+        <input style={colorInputStyle}
           type="color"
           id="strokeColor"
           value={shape.strokeColor}
@@ -117,7 +157,7 @@ function SidePanel({addShape,shape,updateShapeList,backgroundColor,setBackground
         />
       </div>
       <div style={flexItemStyle} className='flex-item'>
-        <label htmlFor="strokeWidth">Stroke Width:</label>
+        <label style={labelStyle} htmlFor="strokeWidth">Stroke Width</label>
         <input style={inputStyle}
           type="number"
           id="strokeWidth"
@@ -126,7 +166,7 @@ function SidePanel({addShape,shape,updateShapeList,backgroundColor,setBackground
         />
       </div>
       <div style={flexItemStyle} className='flex-item'>
-        <label htmlFor="rotation">Rotation:</label>
+        <label style={labelStyle} htmlFor="rotation">Rotation</label>
         <input style={inputStyle}
           type="number"
           id="rotation"

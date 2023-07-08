@@ -14,13 +14,16 @@ function DrawHandles({shape,setIsDragging,setActiveHandle,setActiveLineHandleInd
     let cx = shape.x + shape.width/2;
     let cy = shape.y + shape.height/2;
     let style =  {
+      fill:"grey",
+      stroke:"black",
+      strokeWidth:3
         // transformBox: "fill-box",
         // transform: `rotate(${shape.rotation}deg)`,
         // transforOrigin: "center",//`${cx}px ${cy}px`,
     }
     
   
-    const radius = 5
+    const radius = 8
     let handles = {
       rotate:{
         x:shape.x+shape.width/2,

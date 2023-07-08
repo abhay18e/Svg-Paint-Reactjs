@@ -56,7 +56,7 @@ function App(){
           newShape.y = pointerY-newShape.height/2
         break;
         case "rotate-handle":
-          let radians = Math.atan2(pointerY-newShape.y,pointerX-newShape.x)
+          let radians = Math.atan2(pointer.y-cy,pointer.x-cx)
           newShape.rotation  = radians*180/Math.PI
           break;
         case "line-handle":
