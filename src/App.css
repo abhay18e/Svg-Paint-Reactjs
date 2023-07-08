@@ -11,9 +11,10 @@
 }
 
 #heading {
+  position: relative;;
   text-align: center;
   color: tomato;
-  background-color: #97f79d; 
+  height: 50px;
 }
 
 
@@ -37,11 +38,19 @@
   position: absolute;
   display: flex;
   flex-direction: row;
+  align-items: flex-start;
   width: 250px;
   left:0px;
   top: 0px;
 }
 
 #side-panel-button{
- 
+  background-color: rgba(0,0,0,0);
+  border: none;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  padding: 0px;
+  margin: 0px;
+  
 }

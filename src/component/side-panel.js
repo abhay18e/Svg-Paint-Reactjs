@@ -1,10 +1,30 @@
 import { useState } from 'react'
 function SidePanel({addShape,shape,updateShapeList,backgroundColor,setBackgroundColor}){
   const [vertexCount,setVertexCount] = useState(3)
+
+  const flexContainerStyle = {
+    display: "flex",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    boxShadow: "1px 1px 5px grey",
+  }
+
+  const flexItemStyle = {
+    flex:"95%",
+    margin:"1px",
+  }
+
+  const inputStyle ={
+    
+    width:"50px",
+  }
+  const buttonStyle = {
+    padding:"1px",
+  }
   
   const handleVertexCount = (e)=>{
       const value =Number(e.target.value)
-      value >= 3 ? setVertexCount(value) : setVertexCount(3)
+      setVertexCount(value)
   }
   
    const handleColor = (fillColor)=>{
@@ -29,32 +49,45 @@ function SidePanel({addShape,shape,updateShapeList,backgroundColor,setBackground
    }
 
     return (
-      <div id="side-panel">
-        <div id="shapes">
-        <button onClick={()=>addShape("rectangle")}>
-          Rectangle
-        </button>
-        <button onClick={()=>addShape("circle")}>
-          Circle
-        </button>
-        <button onClick={()=>addShape("ellipse")}>
-          Ellipse
-        </button>
-        <button onClick={()=>addShape("arrow")}>
-         Arrow
-        </button>
-        <button onClick={()=>addShape("line")}>
-          line
-          </button>
-          <input type='number' value={vertexCount} onChange={handleVertexCount} />
-          <button onClick={()=>addShape("polygon",vertexCount)}>
-            Polygon
-            </button>
-        </div>
+      <div style={flexContainerStyle} id="side-panel">
 
-        <div>
+          <div style={flexItemStyle} className="flex-item">
+            <button style={buttonStyle} onClick={() => addShape("rectangle")}>
+              Rectangle
+            </button>
+          </div>
+          <div style={flexItemStyle} className="flex-item">
+            <button style={buttonStyle} onClick={() => addShape("circle")}>
+              Circle
+            </button>
+          </div>
+          <div style={flexItemStyle} className="flex-item">
+            <button style={buttonStyle} onClick={() => addShape("ellipse")}>
+              Ellipse
+            </button>
+          </div>
+          <div style={flexItemStyle} className="flex-item">
+            <button style={buttonStyle} onClick={() => addShape("arrow")}>
+              Arrow
+            </button>
+          </div>
+          <div style={flexItemStyle} className="flex-item">
+            <button style={buttonStyle} onClick={() => addShape("line")}>
+              Line
+            </button>
+          </div>
+          <div style={flexItemStyle} className='flex-item'>
+            <input style={inputStyle} type='number' value={vertexCount} onChange={handleVertexCount} />
+            <button style={buttonStyle} onClick={()=>addShape("polygon",vertexCount)} disabled={vertexCount<3}>
+              Polygon
+            </button>
+          </div>
+          
+        
+
+        <div style={flexItemStyle} className='flex-item'>
         <label htmlFor="background-color">Color:</label>
-        <input
+        <input style={inputStyle}
           type="color"
           id="backgroundColor"
           value={backgroundColor}
@@ -64,45 +97,46 @@ function SidePanel({addShape,shape,updateShapeList,backgroundColor,setBackground
       
    { 
    shape &&    
-  <div>
-      <div>
+  <>
+      <div style={flexItemStyle} className='flex-item'>
         <label htmlFor="fill-color">Color:</label>
-        <input
+        <input style={inputStyle}
           type="color"
           id="fillColor"
           value={shape.fillColor}
           onChange={(e) => handleColor(e.target.value)}
         />
       </div>
-      <div>
+      <div style={flexItemStyle} className='flex-item'>
         <label htmlFor="strokeColor">Stroke Color:</label>
-        <input
+        <input style={inputStyle}
           type="color"
           id="strokeColor"
           value={shape.strokeColor}
           onChange={(e) => handleStrokeColor(e.target.value)}
         />
       </div>
-      <div>
+      <div style={flexItemStyle} className='flex-item'>
         <label htmlFor="strokeWidth">Stroke Width:</label>
-        <input
+        <input style={inputStyle}
           type="number"
           id="strokeWidth"
           value={shape.strokeWidth}
           onChange={(e) => handleStrokeWidth(Number(e.target.value))}
         />
       </div>
-      <div>
+      <div style={flexItemStyle} className='flex-item'>
         <label htmlFor="rotation">Rotation:</label>
-        <input
+        <input style={inputStyle}
           type="number"
           id="rotation"
           value={shape.rotation}
           onChange={(e) => handleRotation(Number(e.target.value))}
         />
       </div>
-      </div>
+      </>
 }
+      
       </div>
     )
   }

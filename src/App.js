@@ -5,6 +5,7 @@ import DrawShape from './component/draw-shape';
 import SidePanel from './component/side-panel';
 import rotatedVector from './util/rotate-vector';
 import shapeInfo from './util/shape-info';
+import MenuIcon from "./media/menu.svg"
 
 function App(){
   let [shapeList,setShapeList] = useState([])
@@ -95,6 +96,7 @@ function App(){
   function handleCLick(e){    
     if(e.target.id === "outer-container" || e.target.id === "svg-container"){
       setActiveShapeIndex(null)
+      setIsShowSidePanel(false)
     }
   }
 
@@ -102,8 +104,15 @@ function App(){
 
   return (
      <div id="outer-container" onClick={handleCLick}>
-        
-        <h1 id="heading">Svg Paint</h1>
+        <div id="heading">
+        <h1 >Svg Paint</h1>
+
+         <button 
+            id="side-panel-button"
+            onClick={()=>setIsShowSidePanel(bool=>!bool)}>
+              <img src={MenuIcon} width={48} height={48}  alt="menu-icon" />
+            </button>
+        </div>
       
         <div id="paint-container">
           <svg 
@@ -148,11 +157,7 @@ function App(){
             backgroundColor={backgroundColor}
             />}
             
-            <button 
-            id="side-panel-button"
-            onClick={()=>setIsShowSidePanel(bool=>!bool)}>
-              {isShowSidePanel ? "Hide Side Panel" : "ShowSidePanel"}
-            </button>
+            
             
           </div>
       
