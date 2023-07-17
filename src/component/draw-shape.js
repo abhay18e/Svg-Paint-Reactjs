@@ -1,7 +1,6 @@
 import { getArrowPoint } from "../util/shape";
 
 function DrawShape({ shape, index, setActive }) {
-  
   let style = {
     transform: `rotate(${shape.rotation}deg)`,
     transformBox: "fill-box",
@@ -9,7 +8,6 @@ function DrawShape({ shape, index, setActive }) {
   };
 
   function passActiveShapeIndex(index) {
-
     setActive((active) => {
       return { ...active, shapeIndex: index };
     });
@@ -23,28 +21,36 @@ function DrawShape({ shape, index, setActive }) {
           y={shape.top}
           width={shape.width}
           height={shape.height}
-          fill={shape.fillColor}
+          fill={
+            shape.fillColor.isGradient
+              ? `url(#gradient${index})`
+              : shape.fillColor.colorA
+          }
           style={style}
           stroke={shape.strokeColor}
           strokeWidth={shape.strokeWidth}
           onClick={() => passActiveShapeIndex(index)}
         />
       );
-      break;
+
     case "circle":
       return (
         <circle
           cx={shape.info().center.x}
           cy={shape.info().center.y}
           r={shape.width / 2}
-          fill={shape.fillColor}
+          fill={
+            shape.fillColor.isGradient
+              ? `url(#gradient${index})`
+              : shape.fillColor.colorA
+          }
           style={style}
           stroke={shape.strokeColor}
           strokeWidth={shape.strokeWidth}
           onClick={() => passActiveShapeIndex(index)}
         />
       );
-      break;
+
     case "ellipse":
       return (
         <ellipse
@@ -52,27 +58,35 @@ function DrawShape({ shape, index, setActive }) {
           cy={shape.info().center.y}
           rx={shape.width / 2}
           ry={shape.height / 2}
-          fill={shape.fillColor}
+          fill={
+            shape.fillColor.isGradient
+              ? `url(#gradient${index})`
+              : shape.fillColor.colorA
+          }
           style={style}
           stroke={shape.strokeColor}
           strokeWidth={shape.strokeWidth}
           onClick={() => passActiveShapeIndex(index)}
         />
       );
-      break;
+
     case "arrow":
       let arrowPoints = getArrowPoint(shape);
       return (
         <polygon
           points={arrowPoints}
-          fill={shape.fillColor}
+          fill={
+            shape.fillColor.isGradient
+              ? `url(#gradient${index})`
+              : shape.fillColor.colorA
+          }
           style={style}
           stroke={shape.strokeColor}
           strokeWidth={shape.strokeWidth}
           onClick={() => passActiveShapeIndex(index)}
         />
       );
-      break;
+
     case "polygon":
       if (shape.points.length === 2) {
         return (
@@ -91,16 +105,20 @@ function DrawShape({ shape, index, setActive }) {
       return (
         <polygon
           points={points}
-          fill={shape.fillColor}
+          fill={
+            shape.fillColor.isGradient
+              ? `url(#gradient${index})`
+              : shape.fillColor.colorA
+          }
           stroke={shape.strokeColor}
           strokeWidth={shape.strokeWidth}
           onClick={() => passActiveShapeIndex(index)}
         />
       );
-      break;
+
     case "curve":
       const curveCommands = shape.points.map((pt, index, points) => {
-        const { x, y,ctx,cty } = pt;
+        const { x, y, ctx, cty } = pt;
         if (index === 0) {
           // Starting point of the first curve
           return `M ${x} ${y}`;
@@ -125,7 +143,6 @@ function DrawShape({ shape, index, setActive }) {
       );
     default:
       return null;
-      break;
   }
 }
 

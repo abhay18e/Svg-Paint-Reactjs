@@ -1,6 +1,14 @@
 import rotateVector from "../util/rotate-vector";
+import { cloneDeep } from "lodash";
 
-function DrawHandles({ shape, setIsDragging, setActive, setInitialPoint }) {
+function DrawHandles({
+  shape,
+  isCurvePolygonCreation,
+  setIsDragging,
+  setActive,
+  setInitialPoint,
+  setTranslatingShape,
+}) {
   let handleXY = true;
   let handleX = true;
   let handleY = true;
@@ -10,9 +18,13 @@ function DrawHandles({ shape, setIsDragging, setActive, setInitialPoint }) {
   if (shape.type === "circle") {
     handleXY = handleY = handleRotate = false;
   }
- 
 
   let box = shape.info().getBoundingRect;
+  let boxStyle = {
+    transform: `rotate(${shape.rotation}deg)`,
+    transformBox: "fill-box",
+    transformOrigin: "center",
+  };
 
   let style = {
     fill: "grey",
@@ -56,12 +68,14 @@ function DrawHandles({ shape, setIsDragging, setActive, setInitialPoint }) {
             stroke="grey"
             fill="transparent"
             strokeWidth={1}
+            style={boxStyle}
           />
         }
 
         {shape.points.map((point, i) => {
           return (
             <circle
+              key={i}
               cx={point.x}
               cy={point.y}
               r={radius}
@@ -73,9 +87,10 @@ function DrawHandles({ shape, setIsDragging, setActive, setInitialPoint }) {
         })}
         {shape.type === "curve" &&
           shape.points.map((point, i) => {
-            if(point.ctx === null) return null
+            if (point.ctx === null) return null;
             return [
               <circle
+                key={i}
                 cx={point.ctx}
                 cy={point.cty}
                 r={radius}
@@ -84,16 +99,34 @@ function DrawHandles({ shape, setIsDragging, setActive, setInitialPoint }) {
                 onTouchStart={(e) => handleDown(e, 0, i)}
               />,
               <line
+                key={i + "line"}
                 x1={point.x}
                 y1={point.y}
                 x2={point.ctx}
                 y2={point.cty}
                 stroke={"black"}
                 strokeWidth={1}
-                
               />,
             ];
           })}
+
+        {!isCurvePolygonCreation && (
+          <circle
+            cx={shape.info().center.x}
+            cy={shape.info().center.y}
+            onMouseDown={(e) => {
+              setTranslatingShape(cloneDeep(shape));
+              handleDown(e);
+            }}
+            onTouchStart={(e) => {
+              setTranslatingShape(cloneDeep(shape));
+              handleDown(e);
+            }}
+            r={radius}
+            style={style}
+            className="handle-curve-polygon-translate"
+          />
+        )}
       </>
     );
   }
@@ -110,6 +143,7 @@ function DrawHandles({ shape, setIsDragging, setActive, setInitialPoint }) {
           stroke="grey"
           fill="transparent"
           strokeWidth={1}
+          style={boxStyle}
         />
       }
 

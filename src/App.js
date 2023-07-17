@@ -8,6 +8,7 @@ import { Polygon, Curve, Rectangle } from "./util/shape";
 import MenuIcon from "./media/menu.svg";
 import { clone, cloneDeep } from "lodash";
 import getAngleBetweenVectors from "./util/angle-btw-vector";
+
 function App() {
   let [shapeList, setShapeList] = useState([]);
   let [isDragging, setIsDragging] = useState(false);
@@ -18,7 +19,12 @@ function App() {
     controlPointIndex: -1,
   });
 
-  let [backgroundColor, setBackgroundColor] = useState("#00ffff");
+  let [backgroundColor, setBackgroundColor] = useState({
+    colorA: "#ff0000",
+    colorB: "#ffff00",
+    isGradient: true,
+    gradientAngle: 0,
+  });
   let svgEl = useRef(null);
   let [isShowSidePanel, setIsShowSidePanel] = useState(true);
   let [isCreatingPolygon, setIsCreatingPolygon] = useState(false);
@@ -26,6 +32,23 @@ function App() {
   let [intialPoint, setInitialPoint] = useState({ x: 0, y: 0 });
   let [currentPoint, setCurrentPoint] = useState({ x: 0, y: 0 });
   let timerId = useRef(null);
+  let translatingShape = useRef(null);
+
+  //console.log all state var in format console.log("var",value)
+  // console.log("shapeList", shapeList);
+  // console.log("isDragging", isDragging);
+  // console.log("active", active);
+  // console.log("active", active);
+  // console.log("backgroundColor", backgroundColor);
+  // console.log("isShowSidePanel", isShowSidePanel);
+  // console.log("isCreatingPolygon", isCreatingPolygon);
+  // console.log("isCreatingCurve", isCreatingCurve);
+  // console.log("intialPoint", intialPoint);
+  // console.log("currentPoint", currentPoint);
+
+  function setTranslatingShape(shape) {
+    translatingShape.current = shape;
+  }
 
   function handleCurveCreation() {
     setIsCreatingPolygon(false);
@@ -121,8 +144,12 @@ function App() {
       setShapeList(newShapeList);
     }
 
-    if (isDragging && !isCreatingCurve) {
-      console.log(active.shapeIndex)
+    if (
+      isDragging &&
+      !isCreatingCurve &&
+      !isCreatingPolygon &&
+      active.shapeIndex !== null
+    ) {
       let newShape = cloneDeep(shapeList[active.shapeIndex]);
       let { x: cx, y: cy } = newShape.info().center;
 
@@ -139,6 +166,7 @@ function App() {
           break;
         case "handle-x":
           newShape.width = Math.max(pointerX - newShape.left, MIN_WIDTH_HEIGHT);
+          if (newShape.type === "circle") newShape.height = newShape.width;
           break;
         case "handle-y":
           newShape.height = Math.max(pointerY - newShape.top, MIN_WIDTH_HEIGHT);
@@ -156,6 +184,17 @@ function App() {
           let degree = getAngleBetweenVectors(vecA, vecB);
           // let radians = Math.atan2(pointer.y - cy, pointer.x - cx);
           newShape.rotation = pointer.x - cx > 0 ? degree : -1 * degree; //(radians * 180) / Math.PI;
+          break;
+        case "handle-curve-polygon-translate":
+          let diffVector = {
+            x: pointer.x - intialPoint.x,
+            y: pointer.y - intialPoint.y,
+          };
+          newShape.points =
+            translatingShape.current.getTranslatedPoints(diffVector);
+          //*****************
+          //************** */ */
+          console.log("inside handle-curve-polygon-translate")
           break;
         case "handle-polygon":
           let newPoints = [...newShape.points];
@@ -206,6 +245,42 @@ function App() {
     });
   }
 
+  function moveUpShape() {
+    if (active.shapeIndex === shapeList.length - 1) return;
+
+    let newShapeList = cloneDeep(shapeList);
+    let temp = newShapeList[active.shapeIndex];
+    newShapeList[active.shapeIndex] = newShapeList[active.shapeIndex + 1];
+    newShapeList[active.shapeIndex + 1] = temp;
+    setShapeList(newShapeList);
+    setActive((active) => {
+      return { ...active, shapeIndex: active.shapeIndex + 1 };
+    });
+  }
+
+  function moveDownShape() {
+    if (active.shapeIndex === 0) return;
+
+    let newShapeList = cloneDeep(shapeList);
+    let temp = newShapeList[active.shapeIndex];
+    newShapeList[active.shapeIndex] = newShapeList[active.shapeIndex - 1];
+    newShapeList[active.shapeIndex - 1] = temp;
+    setShapeList(newShapeList);
+    setActive((active) => {
+      return { ...active, shapeIndex: active.shapeIndex - 1 };
+    });
+  }
+
+  function clearCanvas() {
+    setShapeList([]);
+    setActive({
+      shapeIndex: null,
+      handle: "",
+      pointIndex: -1,
+      controlPointIndex: -1,
+    });
+  }
+
   function deleteShape() {
     if (active.shapeIndex !== null) {
       let newShapeList = cloneDeep(shapeList);
@@ -223,7 +298,12 @@ function App() {
   function updateShapeList(shape) {
     let newShapeList = shapeList.map((item, index) => {
       if (index === active.shapeIndex) {
-        return { ...shape, info: item.info };
+        return {
+          ...shape,
+          info: item.info,
+          getGradientDef: item.getGradientDef,
+          getTranslatedPoints: item.getTranslatedPoints,
+        };
       }
       return item;
     });
@@ -232,7 +312,6 @@ function App() {
 
   function handleCLick(e) {
     let rect = svgEl.current.getBoundingClientRect();
-
     let pointer = {
       x: e.touches ? e.touches[0].clientX - rect.left : e.clientX - rect.left,
       y: e.touches ? e.touches[0].clientY - rect.top : e.clientY - rect.top,
@@ -243,6 +322,7 @@ function App() {
       !isCreatingPolygon &&
       !isCreatingCurve
     ) {
+      console.log("hhhhhhhhhh");
       setActive((active) => {
         return { ...active, shapeIndex: null };
       });
@@ -302,7 +382,6 @@ function App() {
           height={500}
           ref={svgEl}
           id="svg-container"
-          style={{ backgroundColor: backgroundColor }}
           onMouseMove={handlePointerMove}
           onTouchMove={handlePointerMove}
           onMouseUp={handlePointerUp}
@@ -310,6 +389,30 @@ function App() {
           onMouseDown={handlePointerDown}
           onTouchStart={handlePointerDown}
         >
+          <defs>
+            {shapeList.map((shape, index) => shape.getGradientDef(index))}
+            {backgroundColor.isGradient && (
+              <linearGradient
+                id="backgroundGradient"
+                gradientTransform={`rotate(${backgroundColor.gradientAngle})`}
+              >
+                <stop offset="0%" stopColor={backgroundColor.colorA} />
+                <stop offset="100%" stopColor={backgroundColor.colorB} />
+              </linearGradient>
+            )}
+          </defs>
+          <rect
+            x="0"
+            y="0"
+            width="100%"
+            height="100%"
+            fill={
+              backgroundColor.isGradient
+                ? "url(#backgroundGradient)"
+                : backgroundColor.colorA
+            }
+          />
+
           {shapeList.map((shape, index) => (
             <DrawShape
               shape={shape}
@@ -325,6 +428,8 @@ function App() {
               setIsDragging={setIsDragging}
               setActive={setActive}
               setInitialPoint={setInitialPoint}
+              isCurvePolygonCreation={isCreatingCurve || isCreatingPolygon}
+              setTranslatingShape={setTranslatingShape}
             />
           )}
 
@@ -398,6 +503,9 @@ function App() {
               handleCurveCreation={handleCurveCreation}
               isCreatingCurve={isCreatingCurve}
               isCreatingPolygon={isCreatingPolygon}
+              moveDownShape={moveDownShape}
+              moveUpShape={moveUpShape}
+              clearCanvas={clearCanvas}
             />
           )}
         </div>

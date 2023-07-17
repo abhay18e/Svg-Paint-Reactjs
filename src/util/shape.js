@@ -6,10 +6,36 @@ class Rectangle {
     this.top = 100;
     this.width = 100;
     this.height = 100;
-    this.fillColor = "#ff0000";
+    this.fillColor = {
+      colorA: "#ff0000",
+      colorB: "#ffff00",
+      isGradient: true,
+      gradientAngle: 0,
+    };
     this.strokeColor = "#808080";
     this.strokeWidth = 5;
     this.rotation = 0;
+  }
+
+  getTranslatedPoints({ x, y }) {
+    return [];
+  }
+
+  getGradientDef(index) {
+    if (this.fillColor.isGradient) {
+      return (
+        <linearGradient
+          id={`gradient${index}`}
+          key={index}
+          gradientTransform={`rotate(${this.fillColor.gradientAngle})`}
+        >
+          <stop offset="0%" stopColor={this.fillColor.colorA} />
+          <stop offset="100%" stopColor={this.fillColor.colorB} />
+        </linearGradient>
+      );
+    } else {
+      return null;
+    }
   }
 
   info() {
@@ -47,9 +73,39 @@ class Polygon {
     // Shape properties
     this.type = "polygon";
     this.points = [];
-    this.fillColor = "#ff0000";
+    this.fillColor = {
+      colorA: "#ff0000",
+      colorB: "#ffff00",
+      isGradient: false,
+      gradientAngle: -1,
+    };
     this.strokeColor = "#808080";
     this.strokeWidth = 5;
+  }
+
+  getTranslatedPoints({ x, y }) {
+    let modifiedPoints = this.points.map((point) => ({
+      x: point.x + x,
+      y: point.y + y,
+    }));
+    return modifiedPoints;
+  }
+
+  getGradientDef(index) {
+    if (this.fillColor.isGradient) {
+      return (
+        <linearGradient
+          id={`gradient${index}`}
+          key={index}
+          gradientTransform={`rotate(${this.fillColor.gradientAngle})`}
+        >
+          <stop offset="0%" stopColor={this.fillColor.colorA} />
+          <stop offset="100%" stopColor={this.fillColor.colorB} />
+        </linearGradient>
+      );
+    } else {
+      return null;
+    }
   }
 
   info() {
@@ -96,10 +152,43 @@ class Curve {
     // Shape properties
     this.type = "curve";
     this.points = [];
+    this.fillColor = {
+      colorA: "#ff0000",
+      colorB: "#ffff00",
+      isGradient: false,
+      gradientAngle: -1,
+    };
     this.strokeColor = "#808080";
     this.strokeWidth = 5;
     this.tension = 0.5;
     this.closed = true;
+  }
+
+  getTranslatedPoints({ x, y }) {
+    let modifiedPoints = this.points.map((point) => ({
+      x: point.x + x,
+      y: point.y + y,
+      ctx: point.ctx !== null ? point.ctx + x : null,
+      cty: point.cty !== null ? point.cty + y : null,
+    }));
+    return modifiedPoints;
+  }
+
+  getGradientDef(index) {
+    if (this.fillColor.isGradient) {
+      return (
+        <linearGradient
+          id={`gradient${index}`}
+          key={index}
+          gradientTransform={`rotate(${this.fillColor.gradientAngle})`}
+        >
+          <stop offset="0%" stopColor={this.fillColor.colorA} />
+          <stop offset="100%" stopColor={this.fillColor.colorB} />
+        </linearGradient>
+      );
+    } else {
+      return null;
+    }
   }
 
   info() {
@@ -144,7 +233,7 @@ class Curve {
 }
 
 function getArrowPoint(shape) {
-  const { x, y, width: w, height: h } = shape;
+  const { left:x, top:y, width: w, height: h } = shape;
   const A1 = 0.35;
   const A2 = 0.65;
   const B1 = 0.65;

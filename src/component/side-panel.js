@@ -10,7 +10,10 @@ function SidePanel({
   handleCurveCreation,
   isCreatingPolygon,
   isCreatingCurve,
-  deleteShape
+  deleteShape,
+  moveDownShape,
+  moveUpShape,
+  clearCanvas,
 }) {
   const flexContainerStyle = {
     padding: "4px 0px",
@@ -70,7 +73,7 @@ function SidePanel({
     // color: "#fff",
   };
 
-  const handleColor = (fillColor) => {
+  const handleFillColor = (fillColor) => {
     let newShape = { ...shape };
     newShape.fillColor = fillColor;
     updateShapeList(newShape);
@@ -135,33 +138,24 @@ function SidePanel({
         </button>
       </div>
 
-      <div style={flexItemStyle} className="flex-item">
-        <label style={labelStyle} htmlFor="background-color">
-          Background Color
-        </label>
-        <input
-          style={colorInputStyle}
-          type="color"
-          id="backgroundColor"
-          value={backgroundColor}
-          onChange={(e) => setBackgroundColor(e.target.value)}
-        />
-      </div>
+    
+      <FillColor
+        labelText="Background Color"
+        fillColor={backgroundColor}
+        onFillColorChange={setBackgroundColor}
+        labelStyle={labelStyle}
+        colorInputStyle={colorInputStyle}
+      />
 
       {shape && (
         <>
-          <div style={flexItemStyle} className="flex-item">
-            <label style={labelStyle} htmlFor="fill-color">
-              Fill Color
-            </label>
-            <input
-              style={colorInputStyle}
-              type="color"
-              id="fillColor"
-              value={shape.fillColor}
-              onChange={(e) => handleColor(e.target.value)}
-            />
-          </div>
+          <FillColor
+            labelText="Fill Color"
+            fillColor={shape.fillColor}
+            onFillColorChange={handleFillColor}
+            labelStyle={labelStyle}
+            colorInputStyle={colorInputStyle}
+          />
           <div style={flexItemStyle} className="flex-item">
             <label style={labelStyle} htmlFor="strokeColor">
               Stroke Color
@@ -198,16 +192,103 @@ function SidePanel({
               onChange={(e) => handleRotation(Number(e.target.value))}
             />
           </div>
-          { (!isCreatingCurve && !isCreatingPolygon) &&
-            <div style={flexItemStyle} className="flex-item">
-            <button style={buttonStyle} onClick={deleteShape}>
-              Delete {shape.type}
-            </button>
-          </div>}
+          {!isCreatingCurve &&
+            !isCreatingPolygon && [
+              <div style={flexItemStyle} className="flex-item">
+                <button style={buttonStyle} onClick={deleteShape}>
+                  Delete {shape.type}
+                </button>
+              </div>,
+              <div style={flexItemStyle} className="flex-item">
+                <button style={buttonStyle} onClick={moveUpShape}>
+                  Up {shape.type}
+                </button>
+              </div>,
+              <div style={flexItemStyle} className="flex-item">
+                <button style={buttonStyle} onClick={moveDownShape}>
+                  Down {shape.type}
+                </button>
+              </div>,
+
+              <div style={flexItemStyle} className="flex-item">
+                <button style={buttonStyle} onClick={clearCanvas}>
+                  Clear canvas
+                </button>
+              </div>,
+            ]}
         </>
       )}
     </div>
   );
 }
+
+const FillColor = ({
+  fillColor,
+  onFillColorChange,
+  colorInputStyle,
+  labelStyle,
+  labelText,
+}) => {
+  const handleColorAChange = (e) => {
+    const newFillColor = { ...fillColor, colorA: e.target.value };
+    onFillColorChange(newFillColor);
+  };
+
+  const handleColorBChange = (e) => {
+    const newFillColor = { ...fillColor, colorB: e.target.value };
+    onFillColorChange(newFillColor);
+  };
+
+  const handleGradientAngleChange = (e) => {
+    const angle = parseInt(e.target.value);
+    const newFillColor = {
+      ...fillColor,
+      gradientAngle: angle,
+      isGradient: angle !== -1, // Set isGradient to false if gradientAngle is -1
+    };
+    onFillColorChange(newFillColor);
+  };
+
+  return (
+    <div>
+      <label style={labelStyle} htmlFor="colorA">
+        {labelText}:
+      </label>
+      <input
+        style={{ ...colorInputStyle, width: "25px" }}
+        type="color"
+        id="colorA"
+        value={fillColor.colorA}
+        onChange={handleColorAChange}
+      />
+
+      <select
+        style={{ ...colorInputStyle, textAlign: "center" }}
+        id="gradientAngle"
+        value={fillColor.gradientAngle}
+        onChange={handleGradientAngleChange}
+      >
+        <option value={-1}>None</option>
+        <option value={0}>0°</option>
+        <option value={45}>45°</option>
+        <option value={90}>90°</option>
+        <option value={135}>135°</option>
+        <option value={180}>180°</option>
+        <option value={225}>225°</option>
+        <option value={270}>270°</option>
+        <option value={315}>315°</option>
+
+        {/* Add more options for other angles */}
+      </select>
+      <input
+        style={{ ...colorInputStyle, width: "25px" }}
+        type="color"
+        id="colorB"
+        value={fillColor.colorB}
+        onChange={handleColorBChange}
+      />
+    </div>
+  );
+};
 
 export default SidePanel;
