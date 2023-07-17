@@ -110,10 +110,12 @@ class Curve {
     let maxY = -Infinity;
 
     this.points.forEach((point) => {
-      minX = Math.min(minX, point.x, point.ctx);
-      minY = Math.min(minY, point.y, point.cty);
-      maxX = Math.max(maxX, point.x, point.ctx);
-      maxY = Math.max(maxY, point.y, point.cty);
+      let ctx = point.ctx !== null ? point.ctx : point.x;
+      let cty = point.cty !== null ? point.cty : point.y;
+      minX = Math.min(minX, point.x, ctx);
+      minY = Math.min(minY, point.y, cty);
+      maxX = Math.max(maxX, point.x, ctx);
+      maxY = Math.max(maxY, point.y, cty);
     });
 
     const centerX = (minX + maxX) / 2;

@@ -10,6 +10,7 @@ function SidePanel({
   handleCurveCreation,
   isCreatingPolygon,
   isCreatingCurve,
+  deleteShape
 }) {
   const flexContainerStyle = {
     padding: "4px 0px",
@@ -197,6 +198,12 @@ function SidePanel({
               onChange={(e) => handleRotation(Number(e.target.value))}
             />
           </div>
+          { (!isCreatingCurve && !isCreatingPolygon) &&
+            <div style={flexItemStyle} className="flex-item">
+            <button style={buttonStyle} onClick={deleteShape}>
+              Delete {shape.type}
+            </button>
+          </div>}
         </>
       )}
     </div>

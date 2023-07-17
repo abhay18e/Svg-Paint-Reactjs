@@ -113,7 +113,6 @@ function DrawShape({ shape, index, setActive }) {
 
       // Join the path commands into a single string
       const pathData = curveCommands.join(" ");
-
       // Render the Bezier curves
       return (
         <path

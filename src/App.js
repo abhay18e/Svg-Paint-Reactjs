@@ -24,20 +24,23 @@ function App() {
   let [isCreatingPolygon, setIsCreatingPolygon] = useState(false);
   let [isCreatingCurve, setIsCreatingCurve] = useState(false);
   let [intialPoint, setInitialPoint] = useState({ x: 0, y: 0 });
+  let [currentPoint, setCurrentPoint] = useState({ x: 0, y: 0 });
+  let timerId = useRef(null);
 
   function handleCurveCreation() {
+    setIsCreatingPolygon(false);
     if (isCreatingCurve === false) {
       let newShapeList = cloneDeep(shapeList);
       newShapeList.push(new Curve()); //[...shapeList, new Curve()];
       setShapeList(newShapeList);
       setIsCreatingCurve(true);
       setActive((active) => {
-        return { ...active, shapeIndex: shapeList.length };
+        return { ...active, shapeIndex: newShapeList.length - 1 };
       });
     } else {
       //if the user has created a Curve less than 2 points then remove that last shape from shapeList
       if (
-        shapeList.length > 1 &&
+        shapeList.length >= 1 &&
         shapeList[active.shapeIndex].points.length < 2
       ) {
         let newShapeList = cloneDeep(shapeList); //[...shapeList];
@@ -49,6 +52,7 @@ function App() {
   }
 
   function handlePolygonCreation() {
+    setIsCreatingCurve(false);
     if (isCreatingPolygon === false) {
       let newShapeList = cloneDeep(shapeList);
       newShapeList.push(new Polygon()); //[...shapeList, new Polygon()];
@@ -60,7 +64,7 @@ function App() {
     } else {
       //if the user has created a polygon less than 2 points then remove that last shape from shapeList
       if (
-        shapeList.length > 1 &&
+        shapeList.length >= 1 &&
         shapeList[active.shapeIndex].points.length < 2
       ) {
         let newShapeList = cloneDeep(shapeList); //[...shapeList];
@@ -73,7 +77,10 @@ function App() {
   }
 
   function handlePointerUp(e) {
-    setIsDragging(false);
+    timerId.current = setTimeout(() => {
+      setIsDragging(false);
+    }, 100);
+
     setActive((active) => {
       return { ...active, handle: "", pointIndex: -1 };
     });
@@ -96,8 +103,6 @@ function App() {
   }
 
   function handlePointerMove(e) {
-    if (!isDragging) return;
-
     const MIN_WIDTH_HEIGHT = 10;
     let rect = svgEl.current.getBoundingClientRect();
 
@@ -106,16 +111,27 @@ function App() {
       y: e.touches ? e.touches[0].clientY - rect.top : e.clientY - rect.top,
     };
 
-    let newShape = cloneDeep(shapeList[active.shapeIndex]);
-    let { x: cx, y: cy } = newShape.info().center;
+    setCurrentPoint({ x: pointer.x, y: pointer.y });
 
-    let { x: pointerX, y: pointerY } = rotatedVector(
-      newShape.info().center,
-      pointer,
-      -1 * newShape.rotation
-    );
+    if (isDragging && isCreatingCurve) {
+      let newShapeList = cloneDeep(shapeList); //[...shapeList];
+      let lastShape = newShapeList[newShapeList.length - 1];
+      lastShape.points[lastShape.points.length - 1].ctx = pointer.x;
+      lastShape.points[lastShape.points.length - 1].cty = pointer.y;
+      setShapeList(newShapeList);
+    }
 
-    if (isDragging) {
+    if (isDragging && !isCreatingCurve) {
+      console.log(active.shapeIndex)
+      let newShape = cloneDeep(shapeList[active.shapeIndex]);
+      let { x: cx, y: cy } = newShape.info().center;
+
+      let { x: pointerX, y: pointerY } = rotatedVector(
+        newShape.info().center,
+        pointer,
+        -1 * newShape.rotation
+      );
+
       switch (active.handle) {
         case "handle-xy":
           newShape.width = Math.max(pointerX - newShape.left, MIN_WIDTH_HEIGHT);
@@ -152,10 +168,6 @@ function App() {
           if (active.controlPointIndex !== -1) {
             newCurvePoints[active.controlPointIndex].ctx = pointer.x;
             newCurvePoints[active.controlPointIndex].cty = pointer.y;
-            console.log(
-              "control point index",
-              newCurvePoints[active.controlPointIndex]
-            );
           }
           newShape.points = newCurvePoints;
           break;
@@ -167,8 +179,8 @@ function App() {
   }
 
   function addShape(shapeType) {
-    setIsCreatingCurve(false)
-    setIsCreatingPolygon(false)
+    setIsCreatingCurve(false);
+    setIsCreatingPolygon(false);
     let clonedShapeList = cloneDeep(shapeList);
 
     switch (shapeType) {
@@ -187,11 +199,24 @@ function App() {
       default:
         break;
     }
-    console.log("clonedShapeList", clonedShapeList);
     setShapeList(clonedShapeList);
 
     setActive((active) => {
       return { ...active, shapeIndex: shapeList.length };
+    });
+  }
+
+  function deleteShape() {
+    if (active.shapeIndex !== null) {
+      let newShapeList = cloneDeep(shapeList);
+      newShapeList.splice(active.shapeIndex, 1);
+      setShapeList(newShapeList);
+    }
+    setActive({
+      shapeIndex: null,
+      handle: "",
+      pointIndex: -1,
+      controlPointIndex: -1,
     });
   }
 
@@ -213,14 +238,20 @@ function App() {
       y: e.touches ? e.touches[0].clientY - rect.top : e.clientY - rect.top,
     };
 
-    if (e.target.id === "outer-container" || e.target.id === "svg-container") {
+    if (
+      (e.target.id === "outer-container" || e.target.id === "svg-container") &&
+      !isCreatingPolygon &&
+      !isCreatingCurve
+    ) {
       setActive((active) => {
         return { ...active, shapeIndex: null };
       });
       //setIsShowSidePanel(false);
     }
-    console.log(e);
-    if (isCreatingPolygon && e.target.id === "svg-container") {
+    if (
+      isCreatingPolygon &&
+      (e.target.id === "svg-container" || e.target.id === "dummy-line")
+    ) {
       //Add a new point to the points parameter of the last shape in shapeList
       let newShapeList = cloneDeep(shapeList); //[...shapeList];
       let lastShape = newShapeList[newShapeList.length - 1];
@@ -242,9 +273,14 @@ function App() {
       //Add a new point to the points parameter of the last shape in shapeList
       let newShapeList = cloneDeep(shapeList); //[...shapeList];
       let lastShape = newShapeList[newShapeList.length - 1];
-      let newPoints = [...lastShape.points, { x: pointer.x, y: pointer.y }];
+      let newPoints = [
+        ...lastShape.points,
+        { x: pointer.x, y: pointer.y, ctx: pointer.x, cty: pointer.y },
+      ];
       lastShape.points = newPoints;
       setShapeList(newShapeList);
+      setIsDragging(true);
+      clearTimeout(timerId.current);
     }
   }
 
@@ -283,7 +319,7 @@ function App() {
             />
           ))}
 
-          {active.shapeIndex !== null  && (
+          {active.shapeIndex !== null && (
             <DrawHandles
               shape={shapeList[active.shapeIndex]}
               setIsDragging={setIsDragging}
@@ -291,12 +327,69 @@ function App() {
               setInitialPoint={setInitialPoint}
             />
           )}
+
+          {isCreatingPolygon &&
+            shapeList[active.shapeIndex].points.length > 0 && (
+              <line
+                x1={
+                  shapeList[active.shapeIndex].points[
+                    shapeList[active.shapeIndex].points.length - 1
+                  ].x
+                }
+                y1={
+                  shapeList[active.shapeIndex].points[
+                    shapeList[active.shapeIndex].points.length - 1
+                  ].y
+                }
+                x2={currentPoint.x}
+                y2={currentPoint.y}
+                stroke="black"
+                id="dummy-line"
+              />
+            )}
+
+          {isCreatingCurve &&
+            shapeList[active.shapeIndex].points.length &&
+            shapeList[active.shapeIndex].points[
+              shapeList[active.shapeIndex].points.length - 1
+            ].ctx && (
+              <path
+                d={`M ${
+                  shapeList[active.shapeIndex].points[
+                    shapeList[active.shapeIndex].points.length - 1
+                  ].x
+                }
+        ${
+          shapeList[active.shapeIndex].points[
+            shapeList[active.shapeIndex].points.length - 1
+          ].y
+        },
+        C ${
+          shapeList[active.shapeIndex].points[
+            shapeList[active.shapeIndex].points.length - 1
+          ].ctx
+        }
+        ${
+          shapeList[active.shapeIndex].points[
+            shapeList[active.shapeIndex].points.length - 1
+          ].cty
+        },
+        ${currentPoint.x}
+        ${currentPoint.y},
+        ${currentPoint.x}
+        ${currentPoint.y}`}
+                fill={"transparent"}
+                stroke="black"
+                id="dummy-line"
+              />
+            )}
         </svg>
 
         <div id="side-panel-container">
           {isShowSidePanel && (
             <SidePanel
               addShape={addShape}
+              deleteShape={deleteShape}
               shape={shapeList[active.shapeIndex]}
               updateShapeList={updateShapeList}
               setBackgroundColor={setBackgroundColor}
@@ -314,3 +407,40 @@ function App() {
 }
 
 export default App;
+
+/*
+   {isCreatingCurve &&
+            shapeList[active.shapeIndex].points[
+              shapeList[active.shapeIndex].points.length - 1
+            ].ctx && (
+              <path
+                d={`M ${
+                  shapeList[active.shapeIndex].points[
+                    shapeList[active.shapeIndex].points.length - 1
+                  ].x
+                }
+        ${
+          shapeList[active.shapeIndex].points[
+            shapeList[active.shapeIndex].points.length - 1
+          ].y
+        },
+        C ${
+          shapeList[active.shapeIndex].points[
+            shapeList[active.shapeIndex].points.length - 1
+          ].x
+        }
+        ${
+          shapeList[active.shapeIndex].points[
+            shapeList[active.shapeIndex].points.length - 1
+          ].y
+        },
+        ${currentPoint.x}
+        ${currentPoint.y},
+        ${currentPoint.x}
+        ${currentPoint.y}`}
+                fill={"transparent"}
+                stroke="black"
+                id="dummy-line"
+              />
+            )}
+*/

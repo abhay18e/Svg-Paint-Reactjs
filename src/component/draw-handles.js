@@ -10,6 +10,7 @@ function DrawHandles({ shape, setIsDragging, setActive, setInitialPoint }) {
   if (shape.type === "circle") {
     handleXY = handleY = handleRotate = false;
   }
+ 
 
   let box = shape.info().getBoundingRect;
 
@@ -72,6 +73,7 @@ function DrawHandles({ shape, setIsDragging, setActive, setInitialPoint }) {
         })}
         {shape.type === "curve" &&
           shape.points.map((point, i) => {
+            if(point.ctx === null) return null
             return [
               <circle
                 cx={point.ctx}
