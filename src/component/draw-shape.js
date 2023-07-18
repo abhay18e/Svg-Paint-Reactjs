@@ -88,6 +88,7 @@ function DrawShape({ shape, index, setActive }) {
       );
 
     case "polygon":
+
       if (shape.points.length === 2) {
         return (
           <line
@@ -100,8 +101,8 @@ function DrawShape({ shape, index, setActive }) {
             onClick={() => passActiveShapeIndex(index)}
           />
         );
-      }
-      let points = shape.points.map((pt) => `${pt.x} ${pt.y}`);
+      }else if(shape.points.length >2){
+        let points = shape.points.map((pt) => `${pt.x} ${pt.y}`);
       return (
         <polygon
           points={points}
@@ -115,6 +116,10 @@ function DrawShape({ shape, index, setActive }) {
           onClick={() => passActiveShapeIndex(index)}
         />
       );
+      }else{
+        return null
+      }
+      
 
     case "curve":
       const curveCommands = shape.points.map((pt, index, points) => {

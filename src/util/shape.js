@@ -1,3 +1,5 @@
+import rotateVector from "./rotate-vector";
+
 class Rectangle {
   constructor(shapeType) {
     // Shape properties
@@ -21,13 +23,28 @@ class Rectangle {
     return [];
   }
 
+  getRotatedPoints(angle) {
+    return [];
+  }
+
   getGradientDef(index) {
+    // angle can be 0 to 360
+    var anglePI = this.fillColor.gradientAngle * (Math.PI / 180);
+    var angleCoords = {
+      x1: Math.round(50 + Math.sin(anglePI) * 50) + "%",
+      y1: Math.round(50 + Math.cos(anglePI) * 50) + "%",
+      x2: Math.round(50 + Math.sin(anglePI + Math.PI) * 50) + "%",
+      y2: Math.round(50 + Math.cos(anglePI + Math.PI) * 50) + "%",
+    };
     if (this.fillColor.isGradient) {
       return (
         <linearGradient
           id={`gradient${index}`}
           key={index}
-          gradientTransform={`rotate(${this.fillColor.gradientAngle})`}
+          x1={angleCoords.x1}
+          y1={angleCoords.y1}
+          x2={angleCoords.x2}
+          y2={angleCoords.y2}
         >
           <stop offset="0%" stopColor={this.fillColor.colorA} />
           <stop offset="100%" stopColor={this.fillColor.colorB} />
@@ -91,13 +108,33 @@ class Polygon {
     return modifiedPoints;
   }
 
+  getRotatedPoints(angle) {
+    let modifiedPoints = this.points.map((point) => {
+      let center = this.info().center;
+      let newPoint = rotateVector(center, point, angle);
+      return newPoint;
+    });
+    return modifiedPoints;
+  }
+
   getGradientDef(index) {
+    // angle can be 0 to 360
+    var anglePI = this.fillColor.gradientAngle * (Math.PI / 180);
+    var angleCoords = {
+      x1: Math.round(50 + Math.sin(anglePI) * 50) + "%",
+      y1: Math.round(50 + Math.cos(anglePI) * 50) + "%",
+      x2: Math.round(50 + Math.sin(anglePI + Math.PI) * 50) + "%",
+      y2: Math.round(50 + Math.cos(anglePI + Math.PI) * 50) + "%",
+    };
     if (this.fillColor.isGradient) {
       return (
         <linearGradient
           id={`gradient${index}`}
           key={index}
-          gradientTransform={`rotate(${this.fillColor.gradientAngle})`}
+          x1={angleCoords.x1}
+          y1={angleCoords.y1}
+          x2={angleCoords.x2}
+          y2={angleCoords.y2}
         >
           <stop offset="0%" stopColor={this.fillColor.colorA} />
           <stop offset="100%" stopColor={this.fillColor.colorB} />
@@ -174,13 +211,41 @@ class Curve {
     return modifiedPoints;
   }
 
+  getRotatedPoints(angle) {
+    let modifiedPoints = this.points.map((point) => {
+      let center = this.info().center;
+      let newPoint = rotateVector(center, point, angle);
+      let newControlPoints = rotateVector(
+        center,
+        {
+          x: point.ctx,
+          y: point.cty,
+        },
+        angle
+      );
+      return {x:newPoint.x, y:newPoint.y, ctx:newControlPoints.x, cty:newControlPoints.y};
+    });
+    return modifiedPoints;
+  }
+
   getGradientDef(index) {
+    // angle can be 0 to 360
+    var anglePI = this.fillColor.gradientAngle * (Math.PI / 180);
+    var angleCoords = {
+      x1: Math.round(50 + Math.sin(anglePI) * 50) + "%",
+      y1: Math.round(50 + Math.cos(anglePI) * 50) + "%",
+      x2: Math.round(50 + Math.sin(anglePI + Math.PI) * 50) + "%",
+      y2: Math.round(50 + Math.cos(anglePI + Math.PI) * 50) + "%",
+    };
     if (this.fillColor.isGradient) {
       return (
         <linearGradient
           id={`gradient${index}`}
           key={index}
-          gradientTransform={`rotate(${this.fillColor.gradientAngle})`}
+          x1={angleCoords.x1}
+          y1={angleCoords.y1}
+          x2={angleCoords.x2}
+          y2={angleCoords.y2}
         >
           <stop offset="0%" stopColor={this.fillColor.colorA} />
           <stop offset="100%" stopColor={this.fillColor.colorB} />
@@ -233,7 +298,7 @@ class Curve {
 }
 
 function getArrowPoint(shape) {
-  const { left:x, top:y, width: w, height: h } = shape;
+  const { left: x, top: y, width: w, height: h } = shape;
   const A1 = 0.35;
   const A2 = 0.65;
   const B1 = 0.65;

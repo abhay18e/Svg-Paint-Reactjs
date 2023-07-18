@@ -8,10 +8,16 @@ import { Polygon, Curve, Rectangle } from "./util/shape";
 import MenuIcon from "./media/menu.svg";
 import { clone, cloneDeep } from "lodash";
 import getAngleBetweenVectors from "./util/angle-btw-vector";
+import DownloadIcon from "./media/download.svg";
+
 
 function App() {
   let [shapeList, setShapeList] = useState([]);
   let [isDragging, setIsDragging] = useState(false);
+  let [svgHeight, setSvgHeight] = useState(500);
+
+  
+
   let [active, setActive] = useState({
     shapeIndex: null,
     handle: "",
@@ -45,6 +51,31 @@ function App() {
   // console.log("isCreatingCurve", isCreatingCurve);
   // console.log("intialPoint", intialPoint);
   // console.log("currentPoint", currentPoint);
+  useEffect(() => {
+    //set svgHeight to windowHeight-50px
+    let windowHeight = window.innerHeight;
+    let svgHeight = windowHeight - 54;
+    setSvgHeight(svgHeight);
+  }, [svgHeight]);
+
+
+  function downloadSvg(){
+    const svgData = new XMLSerializer().serializeToString(svgEl.current);
+
+    // Create a Blob from the SVG data
+    const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+
+    // Create a temporary link element and set its attributes
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'drawing.svg';
+
+    // Programmatically click the link to trigger the download
+    link.click();
+
+    // Clean up the temporary link
+    URL.revokeObjectURL(link.href);
+  }
 
   function setTranslatingShape(shape) {
     translatingShape.current = shape;
@@ -159,6 +190,14 @@ function App() {
         -1 * newShape.rotation
       );
 
+      let vecA = {
+        x: intialPoint.x - rect.left - cx,
+        y: intialPoint.y - rect.top - cy,
+      };
+      let vecB = { x: pointer.x - cx, y: pointer.y - cy };
+      let degree = getAngleBetweenVectors(vecA, vecB);
+      degree = pointer.x - cx > 0 ? degree : -1 * degree;
+
       switch (active.handle) {
         case "handle-xy":
           newShape.width = Math.max(pointerX - newShape.left, MIN_WIDTH_HEIGHT);
@@ -176,14 +215,8 @@ function App() {
           newShape.top = pointerY - newShape.height / 2;
           break;
         case "handle-rotate":
-          let vecA = {
-            x: intialPoint.x - rect.left - cx,
-            y: intialPoint.y - rect.top - cy,
-          };
-          let vecB = { x: pointer.x - cx, y: pointer.y - cy };
-          let degree = getAngleBetweenVectors(vecA, vecB);
           // let radians = Math.atan2(pointer.y - cy, pointer.x - cx);
-          newShape.rotation = pointer.x - cx > 0 ? degree : -1 * degree; //(radians * 180) / Math.PI;
+          newShape.rotation = degree; //(radians * 180) / Math.PI;
           break;
         case "handle-curve-polygon-translate":
           let diffVector = {
@@ -194,7 +227,10 @@ function App() {
             translatingShape.current.getTranslatedPoints(diffVector);
           //*****************
           //************** */ */
-          console.log("inside handle-curve-polygon-translate")
+          console.log("inside handle-curve-polygon-translate");
+          break;
+        case "handle-curve-polygon-rotate":
+          newShape.points = translatingShape.current.getRotatedPoints(degree);
           break;
         case "handle-polygon":
           let newPoints = [...newShape.points];
@@ -303,6 +339,7 @@ function App() {
           info: item.info,
           getGradientDef: item.getGradientDef,
           getTranslatedPoints: item.getTranslatedPoints,
+          getRotatedPoints: item.getRotatedPoints,
         };
       }
       return item;
@@ -311,6 +348,7 @@ function App() {
   }
 
   function handleCLick(e) {
+    console.log(e);
     let rect = svgEl.current.getBoundingClientRect();
     let pointer = {
       x: e.touches ? e.touches[0].clientX - rect.left : e.clientX - rect.left,
@@ -375,13 +413,17 @@ function App() {
         >
           <img src={MenuIcon} width={48} height={48} alt="menu-icon" />
         </button>
+
+        <button id="download-svg-button" onClick={downloadSvg}>
+          <img src={DownloadIcon} width={48} height={48} alt="download-icon" />
+        </button>
       </div>
 
       <div id="paint-container">
         <svg
-          height={500}
+          height={svgHeight}
           ref={svgEl}
-          id="svg-container"
+          id="svg-container-main"
           onMouseMove={handlePointerMove}
           onTouchMove={handlePointerMove}
           onMouseUp={handlePointerUp}
@@ -402,6 +444,7 @@ function App() {
             )}
           </defs>
           <rect
+            id="svg-container"
             x="0"
             y="0"
             width="100%"

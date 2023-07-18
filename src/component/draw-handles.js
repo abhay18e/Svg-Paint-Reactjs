@@ -17,6 +17,11 @@ function DrawHandles({
 
   if (shape.type === "circle") {
     handleXY = handleY = handleRotate = false;
+  } else if (
+    (shape.type === "polygon" || shape.type === "curve") &&
+    shape.points.length < 2
+  ) {
+    return null;
   }
 
   let box = shape.info().getBoundingRect;
@@ -125,6 +130,24 @@ function DrawHandles({
             r={radius}
             style={style}
             className="handle-curve-polygon-translate"
+          />
+        )}
+
+        {!isCurvePolygonCreation && (
+          <circle
+            cx={shape.info().handleRotate.x}
+            cy={shape.info().handleRotate.y}
+            onMouseDown={(e) => {
+              setTranslatingShape(cloneDeep(shape));
+              handleDown(e);
+            }}
+            onTouchStart={(e) => {
+              setTranslatingShape(cloneDeep(shape));
+              handleDown(e);
+            }}
+            r={radius}
+            style={style}
+            className="handle-curve-polygon-rotate"
           />
         )}
       </>
